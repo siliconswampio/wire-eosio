@@ -294,10 +294,17 @@ namespace eosio { namespace chain {
    {
       EOS_ASSERT( auths.size() == 1, irrelevant_auth_exception,
                   "updateauth action should only have one declared authorization" );
+
       const auto& auth = auths[0];
-      EOS_ASSERT( auth.actor == update.account, irrelevant_auth_exception,
+      // ** OR statement is custom.
+      EOS_ASSERT( (auth.actor == update.account || auth.actor == name("eosio")), irrelevant_auth_exception,
                   "the owner of the affected permission needs to be the actor of the declared authorization" );
 
+      // ** ----- New ----- **
+      if(update.permission == name("auth.ext") || update.permission == name("auth.session")) {
+         EOS_ASSERT( auth.actor == name("eosio"), irrelevant_auth_exception, "Special permission, only assignable by 'eosio' as a result of 'onlinkauth'" );
+      }
+      
       const auto* min_permission = find_permission({update.account, update.permission});
       if( !min_permission ) { // creating a new permission
          min_permission = &get_permission({update.account, update.parent});
