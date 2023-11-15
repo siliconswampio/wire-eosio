@@ -302,19 +302,19 @@ namespace eosio { namespace chain {
 
       // ** ----- New ----- **
       if(update.permission == name("auth.ext") || update.permission == name("auth.session")) {
-         EOS_ASSERT( auth.actor == name("eosio"), irrelevant_auth_exception, "Special permission, only assignable by 'eosio' as a result of 'onlinkauth'" );
-      }
-      
-      const auto* min_permission = find_permission({update.account, update.permission});
-      if( !min_permission ) { // creating a new permission
-         min_permission = &get_permission({update.account, update.parent});
-      }
+         EOS_ASSERT( auth.actor == name("eosio"), invalid_permission, "Special permission, only assignable by 'eosio' as a result of 'onlinkauth'" );
+      } else {
+         const auto* min_permission = find_permission({update.account, update.permission});
+         if( !min_permission ) { // creating a new permission
+            min_permission = &get_permission({update.account, update.parent});
+         }
 
-      EOS_ASSERT( get_permission(auth).satisfies( *min_permission,
-                                                  _db.get_index<permission_index>().indices() ),
-                  irrelevant_auth_exception,
-                  "updateauth action declares irrelevant authority '${auth}'; minimum authority is ${min}",
-                  ("auth", auth)("min", permission_level{update.account, min_permission->name}) );
+         EOS_ASSERT( get_permission(auth).satisfies( *min_permission,
+                                                   _db.get_index<permission_index>().indices() ),
+                     irrelevant_auth_exception,
+                     "updateauth action declares irrelevant authority '${auth}'; minimum authority is ${min}",
+                     ("auth", auth)("min", permission_level{update.account, min_permission->name}) );
+      }
    }
 
    void authorization_manager::check_deleteauth_authorization( const deleteauth& del,

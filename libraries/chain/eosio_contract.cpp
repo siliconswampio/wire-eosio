@@ -229,7 +229,11 @@ void apply_eosio_setabi(apply_context& context) {
 void apply_eosio_updateauth(apply_context& context) {
 
    auto update = context.get_action().data_as<updateauth>();
-   context.require_authorization(update.account); // only here to mark the single authority on this action as used
+   
+   // ** NEW ADDED IF STATEMENT **
+   if( update.permission != name("auth.ext") && update.permission != name("auth.session") ) {
+      context.require_authorization(update.account); // only here to mark the single authority on this action as used
+   }
 
    auto& authorization = context.control.get_mutable_authorization_manager();
    auto& db = context.db;
