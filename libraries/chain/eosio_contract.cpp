@@ -322,7 +322,6 @@ void apply_eosio_deleteauth(apply_context& context) {
    authorization.remove_permission( permission );
 
    context.add_ram_usage( remove.account, -old_size );
-
 }
 
 void apply_eosio_linkauth(apply_context& context) {

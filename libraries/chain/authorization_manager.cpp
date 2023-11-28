@@ -296,11 +296,12 @@ namespace eosio { namespace chain {
                   "updateauth action should only have one declared authorization" );
 
       const auto& auth = auths[0];
-      // ** OR statement is custom.
+
+      // ** OR statement is custom, added to allow for eosio to add 'auth.ext' and 'auth.session' to users via our custom 'onlinkauth' from system contract.
       EOS_ASSERT( (auth.actor == update.account || auth.actor == name("eosio")), irrelevant_auth_exception,
                   "the owner of the affected permission needs to be the actor of the declared authorization" );
 
-      // ** ----- New ----- **
+      // ** New: Prevents users from updating / adding 'auth.ext' and 'auth.session' special permissions.
       if(update.permission == name("auth.ext") || update.permission == name("auth.session")) {
          EOS_ASSERT( auth.actor == name("eosio"), invalid_permission, "Special permission, only assignable by 'eosio' as a result of 'onlinkauth'" );
       } else {
