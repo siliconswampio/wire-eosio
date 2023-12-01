@@ -7,7 +7,7 @@
 
 namespace eosio { namespace chain {
 
-using shared_public_key_data = fc::static_variant<fc::ecc::public_key_shim, fc::crypto::r1::public_key_shim, shared_string>;
+using shared_public_key_data = fc::static_variant<fc::ecc::public_key_shim, fc::crypto::r1::public_key_shim, shared_string, fc::em::public_key_shim>;
 
 struct shared_public_key {
    shared_public_key( shared_public_key_data&& p ) :
@@ -16,8 +16,8 @@ struct shared_public_key {
    operator public_key_type() const {
       fc::crypto::public_key::storage_type public_key_storage;
       pubkey.visit(overloaded {
-         [&](const auto& k1r1) {
-            public_key_storage = k1r1;
+         [&](const auto& k1r1em) {
+            public_key_storage = k1r1em;
          },
          [&](const shared_string& wa) {
             fc::datastream ds(wa.data(), wa.size());
@@ -48,6 +48,9 @@ struct shared_public_key {
          },
          [&](const shared_string& wa) {
             return wa == rhs.pubkey.get<shared_string>();
+         },
+         [&](const fc::em::public_key_shim& em) {
+            return em._data == rhs.pubkey.get<fc::em::public_key_shim>()._data;
          }
       });
    }
@@ -68,6 +71,9 @@ struct shared_public_key {
             fc::crypto::webauthn::public_key pub;
             fc::raw::unpack(ds, pub);
             return pub == r._storage.get<fc::crypto::webauthn::public_key>();
+         },
+         [&](const fc::em::public_key_shim& em) {
+            return em._data == r._storage.get<fc::em::public_key_shim>()._data;
          }
       });
    }
@@ -106,8 +112,8 @@ struct shared_key_weight {
 
    static shared_key_weight convert(chainbase::allocator<char> allocator, const key_weight& k) {
       return k.key._storage.visit<shared_key_weight>(overloaded {
-         [&](const auto& k1r1) {
-            return shared_key_weight(k1r1, k.weight);
+         [&](const auto& k1r1em) {
+            return shared_key_weight(k1r1em, k.weight);
          },
          [&](const fc::crypto::webauthn::public_key& wa) {
             size_t psz = fc::raw::pack_size(wa);
