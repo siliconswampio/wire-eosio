@@ -186,6 +186,18 @@ may use a new `set_proposed_producers_ex` intrinsic to access extended features.
 */
             {}
          } )
+         (
+            builtin_protocol_feature_t::em_key, builtin_protocol_feature_spec{
+               "EM_KEY",
+               fc::variant("44454e39d7192100f75c2e4895be95c0d56226f8a33e886d537c10126f6b1d60").as<digest_type>(),
+               // SHA256 hash of the raw message below within the comment delimiters (do not modify message below).
+/*
+Builtin protocol feature: EM_KEY
+
+Enables usage of EM ( Ethereum Message ) keys and signatures.
+*/
+            {}
+         }  )
    ;
 
 
